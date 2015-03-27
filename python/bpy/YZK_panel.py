@@ -6,42 +6,45 @@ bl_info = {
 
 import bpy
 from itertools import chain #yzk_select_handle
+import zipfile, urllib.request, os, sys, re #yzk_update_addon
 
 class yzk_CustomPanel1(bpy.types.Panel):
-    """Creates a Panel in the Object properties window"""
-    bl_label = "PopupWindow"
-    bl_space_type = 'VIEW_3D'
-    bl_region_type = 'TOOLS'
-    bl_category = "yzk"
-    bl_idname = "yzk_yzk_CustomPanel1"
-    #bl_region_type = 'WINDOW'
-    #bl_context = "object"
+	"""Creates a Panel in the Object properties window"""
+	bl_label = "PopupWindow"
+	bl_space_type = 'VIEW_3D'
+	bl_region_type = 'TOOLS'
+	bl_category = "yzk"
+	bl_idname = "yzk_yzk_CustomPanel1"
+	#bl_region_type = 'WINDOW'
+	#bl_context = "object"
 
-    def draw(self, context):
-        layout = self.layout
-        col = layout.column(align=True)
-        col.operator("yzk.yzk_popup_window", text="duplicateWindow", icon='INFO').areaType="INFO"
-        row = col.row(align=True)
-        row.operator("yzk.yzk_popup_window", text="python", icon='CONSOLE').areaType="CONSOLE"
-        row.operator("yzk.yzk_popup_window", text="text", icon='TEXT').areaType="TEXT_EDITOR"
-        row.operator("yzk.yzk_popup_window", text="user", icon='PREFERENCES').areaType="USER_PREFERENCES"
+	def draw(self, context):
+		layout = self.layout
+		col = layout.column(align=True)
+		col.operator("yzk.yzk_update_addon", text="yzk_update_addon")
+		col.operator("yzk.yzk_popup_window", text="duplicateWindow", icon='INFO').areaType="INFO"
+		row = col.row(align=True)
+		row.operator("yzk.yzk_popup_window", text="python", icon='CONSOLE').areaType="CONSOLE"
+		row.operator("yzk.yzk_popup_window", text="text", icon='TEXT').areaType="TEXT_EDITOR"
+		row.operator("yzk.yzk_popup_window", text="user", icon='PREFERENCES').areaType="USER_PREFERENCES"
 
-        col = layout.column(align=True)
-        row = col.row(align=True)
-        row.operator("view3d.view_persportho",text='pers/orth', icon='CAMERA_DATA')
-        row.operator("view3d.view_all", text="focus", icon='BBOX')
+		col = layout.column(align=True)
+		row = col.row(align=True)
+		row.operator("view3d.view_persportho",text='pers/orth', icon='CAMERA_DATA')
+		row.operator("view3d.view_all", text="focus", icon='BBOX')
 
-        row = col.row(align=True)
-        row.operator("object.shade_smooth", text="Smooth")
-        row.operator("object.shade_flat", text="Flat")
+		row = col.row(align=True)
+		row.operator("object.shade_smooth", text="Smooth")
+		row.operator("object.shade_flat", text="Flat")
 
-        col = layout.column(align=True)
-        obj = bpy.context.object
-        if obj is not None and obj.type == 'MESH' and obj.mode == "EDIT":
-            col.operator("mesh.reveal",text='UnHide_all')
-        else:
-            col.operator("object.hide_view_clear",text='UnHide_all ')
-            col.operator("view3d.snap_mesh_view")
+		col = layout.column(align=True)
+		obj = bpy.context.object
+		
+		if obj is not None and obj.type == 'MESH' and obj.mode == "EDIT":
+			col.operator("mesh.reveal",text='UnHide_all')
+		else:
+			col.operator("object.hide_view_clear",text='UnHide_all ')
+			col.operator("view3d.snap_mesh_view")
 
 
 class yzk_CustomPanel2(bpy.types.Panel):
@@ -590,7 +593,7 @@ class yzk_update_addon(bpy.types.Operator):
 	def execute(self, context):
 		response = urllib.request.urlopen("https://github.com/coverman03/blender/archive/master.zip")
 		tempDir = bpy.app.tempdir
-		zipPath = tempDir + r"\YZKpanel_master.zip"
+		zipPath = tempDir + r"\blender-master.zip"
 		addonDir = os.path.dirname(__file__)
 		f = open(zipPath, "wb")
 		f.write(response.read())
@@ -630,6 +633,7 @@ def register():
     bpy.utils.register_class(yzk_CustomPanel2)
     bpy.utils.register_class(yzk_tools_panel)
     bpy.utils.register_class(yzk2_CustomPanel1)
+    bpy.utils.register_class(yzk_update_addon)
 
 def unregister():
     bpy.utils.unregister_class(yzk_popup_window)
@@ -653,6 +657,7 @@ def unregister():
     bpy.utils.unregister_class(yzk_CustomPanel2)
     bpy.utils.unregister_class(yzk_tools_panel)
     bpy.utils.unregister_class(yzk2_CustomPanel1)
+    bpy.utils.unregister_class(yzk_update_addon)
 
 if __name__ == "__main__":
     register()
