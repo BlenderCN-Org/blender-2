@@ -25,31 +25,31 @@ class yzk_CustomPanel1(bpy.types.Panel):
         row.operator("yzk.yzk_popup_window", text="python", icon='CONSOLE').areaType="CONSOLE"
         row.operator("yzk.yzk_popup_window", text="text", icon='TEXT').areaType="TEXT_EDITOR"
         row.operator("yzk.yzk_popup_window", text="user", icon='PREFERENCES').areaType="USER_PREFERENCES"
-        
+
         col = layout.column(align=True)
         row = col.row(align=True)
         row.operator("view3d.view_persportho",text='pers/orth', icon='CAMERA_DATA')
         row.operator("view3d.view_all", text="focus", icon='BBOX')
-        
+
         row = col.row(align=True)
         row.operator("object.shade_smooth", text="Smooth")
         row.operator("object.shade_flat", text="Flat")
 
         col = layout.column(align=True)
-        obj = bpy.context.object       
+        obj = bpy.context.object
         if obj is not None and obj.type == 'MESH' and obj.mode == "EDIT":
             col.operator("mesh.reveal",text='UnHide_all')
         else:
-            col.operator("object.hide_view_clear",text='UnHide_all ') 
+            col.operator("object.hide_view_clear",text='UnHide_all ')
             col.operator("view3d.snap_mesh_view")
-            
-            
+
+
 class yzk_CustomPanel2(bpy.types.Panel):
     bl_label = "addPrimitive"
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'TOOLS'
     bl_category = "yzk"
-    
+
     def draw(self, context):
         layout = self.layout
 
@@ -62,39 +62,39 @@ class yzk_CustomPanel2(bpy.types.Panel):
         row.operator("mesh.primitive_cylinder_add", text='cylinder', icon='MESH_CYLINDER')
         row.operator("mesh.primitive_uv_sphere_add",text='sphere', icon='MESH_UVSPHERE')
         col.operator("yzk.yzk_curve_new", text="null curve", icon="CURVE_BEZCURVE")
-               
+
 class yzk_tools_panel(bpy.types.Panel):
     bl_label = "tools"
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'TOOLS'
     bl_category = "yzk"
-    
+
     def draw(self, context):
         layout = self.layout
 
         obj = context.active_object
         if obj is not None and obj.mode == "OBJECT":
             col = layout.column(align=True)
-            col.menu("VIEW3D_MT_object", icon="OBJECT_DATAMODE")  
+            col.menu("VIEW3D_MT_object", icon="OBJECT_DATAMODE")
         elif obj is not None and obj.mode == "EDIT":
-            if obj.type == 'MESH': 
+            if obj.type == 'MESH':
                 col = layout.column(align=True)
                 col.menu("VIEW3D_MT_edit_mesh",icon="EDITMODE_HLT")
-            elif obj.type == 'CURVE': 
+            elif obj.type == 'CURVE':
                 col = layout.column(align=True)
                 col.menu("VIEW3D_MT_edit_curve",icon="OUTLINER_OB_CURVE")
             else:
                 layout.label(text="Active obj: unknownType")
         else:
             layout.label(text="Active obj: None")
-                
+
         if obj is not None and obj.mode == "OBJECT":
                 col = layout.column(align=True)
                 col.menu("VIEW3D_MT_transform_object", icon="MANIPUL")
                 col.operator("object.location_clear", text="reset Transform")
                 col.operator("object.rotation_clear", text="reset Rotation")
                 col.operator("object.scale_clear", text="reset Scale")
-                
+
                 row = col.row(align=True)
                 row.operator("object.origin_set", text="center").type='ORIGIN_CENTER_OF_MASS'
                 props = row.operator("object.transform_apply" ,text="freeze")
@@ -103,19 +103,21 @@ class yzk_tools_panel(bpy.types.Panel):
                 props.scale=True
 
                 col = layout.column(align=True)
-                col.operator("object.select_grouped").type='GROUP'
+                row = layout.row(align=True)
+                row.operator("object.select_all").action='DESELECT'
+                row.operator("object.select_grouped").type='GROUP'
                 row = layout.row(align=True)
                 row.operator("object.join", text="join")
                 row.operator("mesh.separate").type='LOOSE'
-                
+
                 #col = layout.column(align=True)
-                #col.operator("object.parent_clear",text='parent_clear').type='CLEAR' 
-                
+                #col.operator("object.parent_clear",text='parent_clear').type='CLEAR'
+
                 col = layout.column(align=True)
                 row = col.row(align=True)
                 row.operator("yzk.yzk_duplicate", text="duplicate")
                 row.operator("yzk.yzk_instance", text="instance")
-                
+
                 if obj.type=='MESH':
                     col = layout.column(align=True)
                     col.operator("object.modifier_add",text='modifier', icon='MODIFIER')
@@ -125,15 +127,14 @@ class yzk_tools_panel(bpy.types.Panel):
                     row = col.row(align=True)
                     row.operator("object.modifier_add",text='bevel', icon='MOD_BEVEL').type='BEVEL'
                     row.operator("object.modifier_add",text='subsurf', icon='MOD_SUBSURF').type='SUBSURF'
-                    
+
                     col = layout.column(align=True)
-                    col.operator("object.apply_modifiers_and_join",text='ApplyAllMod')
                     col.operator("object.convert",text="convert to curve").target='CURVE'
-                    
+
                 elif obj.type=='CURVE':
                     col = layout.column(align=True)
                     col.operator("object.convert",text="convert to mesh").target='MESH'
-        
+
         if obj is not None and obj.mode == "EDIT":
             #obj.type in {'MESH', 'CURVE', 'SURFACE','META','FONT','ARMATURE','LATTICE'}:
             col = layout.column(align=True)
@@ -147,21 +148,21 @@ class yzk_tools_panel(bpy.types.Panel):
             props = row.operator("transform.resize", text="alignZ")
             props.value = (0,0,0)
             props.constraint_axis=(False, False, True)
-            
-            if obj.type == 'MESH': 
+
+            if obj.type == 'MESH':
                 col = layout.column(align=True)
                 col.operator("mesh.flip_normals")
-                
+
                 col = layout.column(align=True)
                 col.menu("VIEW3D_MT_edit_mesh_vertices", text='vertex', icon='VERTEXSEL')
                 #col.operator_menu_enum("mesh.merge", "type")
                 #col.operator("mesh.merge", text="mergeVertex").type='CENTER'
                 col.operator("yzk.yzk_3dcursor", text="pivotToSelected")
                 col.operator("mesh.remove_doubles")
-                
+
                 col = layout.column(align=True)
                 col.menu("VIEW3D_MT_edit_mesh_edges", text='edge', icon='EDGESEL')
-                #col.operator("mesh.loop_multi_select",text='edge_loop') 
+                #col.operator("mesh.loop_multi_select",text='edge_loop')
                 row = col.row(align=True)
                 row.operator("yzk.yzk_edge_hard",text='hard_edge')
                 row.operator("yzk.yzk_edge_soft",text='soft_edge')
@@ -200,14 +201,14 @@ class yzk_tools_panel(bpy.types.Panel):
                 col.operator("mesh.inset")
                 row = col.row(align=True)
                 row.operator("view3d.edit_mesh_extrude_move_normal", text="Extrude")
-                row.operator("view3d.edit_mesh_extrude_individual_move", text="Extrude Individual")               
-   
+                row.operator("view3d.edit_mesh_extrude_individual_move", text="Extrude Individual")
+
                 col = layout.column(align=True)
                 col.menu("VIEW3D_MT_edit_mesh_delete")
                 col.operator("yzk.yzk_delete")
                 col.operator("mesh.dissolve_limited",text='delete_dissolve').angle_limit=180
-                
-            elif obj.type == 'CURVE': 
+
+            elif obj.type == 'CURVE':
                 col = layout.column(align=True)
                 row = col.row(align=True)
                 row.operator("curve.spline_type_set", text="poly", icon="IPO_CONSTANT").type='POLY'
@@ -220,7 +221,7 @@ class yzk_tools_panel(bpy.types.Panel):
                 row.operator("curve.switch_direction")
                 row.operator("curve.make_segment")
                 col.operator("curve.radius_set")
-                                
+
                 col = layout.column(align=True)
                 col.label(text="Handles:")
                 row = col.row(align=True)
@@ -237,7 +238,7 @@ class yzk_tools_panel(bpy.types.Panel):
                 col.operator("curve.subdivide")
                 col.operator("curve.smooth")
                 col.operator("object.vertex_random")
-                col.operator("curve.normals_make_consistent")       
+                col.operator("curve.normals_make_consistent")
 
 
 class yzk_CustomPanel5(bpy.types.Panel):
@@ -245,7 +246,7 @@ class yzk_CustomPanel5(bpy.types.Panel):
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'TOOLS'
     bl_category = "yzk"
-    
+
     def draw(self, context):
         layout = self.layout
 
@@ -262,14 +263,14 @@ class yzk_CustomPanel5(bpy.types.Panel):
             col.menu("VIEW3D_MT_object_showhide")
             col.operator("object.hide_view_clear",text='Show_all (Shift+A)')
             col.operator("object.hide_view_set",text='Hide_selected (Ctrl+H)').unselected=False
-            col.operator("object.hide_view_set",text='Hide_Unselected (Alt+H)').unselected=True 
+            col.operator("object.hide_view_set",text='Hide_Unselected (Alt+H)').unselected=True
 
 class yzk2_CustomPanel1(bpy.types.Panel):
     bl_label = "oldTools"
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'TOOLS'
     bl_category = "old"
-    
+
     def draw(self, context):
         layout = self.layout
 
@@ -278,7 +279,7 @@ class yzk2_CustomPanel1(bpy.types.Panel):
         col = layout.column(align=True)
         col.operator("object.mode_set", text='objectMode', icon='OBJECT_DATAMODE').mode='OBJECT'
         col.operator("object.mode_set", text='editMode', icon='EDITMODE_HLT').mode='EDIT'
-        
+
         layout.label(text="callMenu")
         col = layout.column(align=True)
         col.operator("wm.call_menu").name='INFO_MT_add'
@@ -291,7 +292,7 @@ class yzk2_CustomPanel1(bpy.types.Panel):
         col.operator("wm.call_menu",text='addArmatureMenu', icon='OUTLINER_OB_ARMATURE').name="INFO_MT_armature_add"
         col.operator("object.empty_add",text='addEmptyMenu', icon='OUTLINER_OB_EMPTY')
         col.operator("object.lamp_add",text="addLampMenu", icon='OUTLINER_OB_LAMP')
-        
+
         layout.label(text="addPrimitive")
         col = layout.column(align=True)
         col.menu("INFO_MT_add")
@@ -301,7 +302,7 @@ class yzk2_CustomPanel1(bpy.types.Panel):
         row.operator("mesh.primitive_cylinder_add", text='cylinder', icon='MESH_CYLINDER')
         row = col.row(align=True)
         row.operator("mesh.primitive_uv_sphere_add",text='sphere', icon='MESH_UVSPHERE')
-        
+
         col.menu("INFO_MT_metaball_add")
         row = col.row(align=True)
         row.operator("object.metaball_add",text='metaBall', icon='META_BALL').type='BALL'
@@ -311,7 +312,7 @@ class yzk2_CustomPanel1(bpy.types.Panel):
         row = col.row(align=True)
         row.operator("curve.primitive_nurbs_path_add", text='path',icon='CURVE_PATH')
         row.operator("curve.primitive_nurbs_circle_add",text='circle', icon='CURVE_NCIRCLE')
-        
+
         row = layout.row(align=True)
         row.menu("INFO_MT_mesh_add")
         row.menu("INFO_MT_curve_add")
@@ -327,49 +328,30 @@ class yzk_popup_window(bpy.types.Operator):
     bl_idname = "yzk.yzk_popup_window"
     bl_label = "yzk_popup_window"
     areaType = bpy.props.StringProperty()
- 
+
     def execute(self, context):
-        currentAreaType = bpy.context.area.type 
+        currentAreaType = bpy.context.area.type
         bpy.context.area.type = self.areaType
         bpy.ops.screen.area_dupli('INVOKE_DEFAULT')
         bpy.context.area.type = currentAreaType
         return {'FINISHED'}
 
-class yzk_select_edit_mode_vert(bpy.types.Operator):
-    bl_idname = "yzk.yzk_select_edit_mode_vert"
-    bl_label = "yzk_select_edit_mode_vert"
- 
-    def execute(self, context):
-        if bpy.context.object.mode != 'EDIT':
-            bpy.ops.object.mode_set(mode='EDIT')
-        bpy.ops.mesh.select_mode(type="VERT")
-        return {'FINISHED'}
+class yzk_select_edit_mode(bpy.types.Operator):
+    bl_idname = "yzk.yzk_select_edit_mode"
+    bl_label = "yzk_select_edit_mode"
+    editType = bpy.props.StringProperty()
 
-class yzk_select_edit_mode_edge(bpy.types.Operator):
-    bl_idname = "yzk.yzk_select_edit_mode_edge"
-    bl_label = "yzk_select_edit_mode_edge"
- 
     def execute(self, context):
         if bpy.context.object.mode != 'EDIT':
             bpy.ops.object.mode_set(mode='EDIT')
-        bpy.ops.mesh.select_mode(type="EDGE")
-        return {'FINISHED'}
-
-class yzk_select_edit_mode_face(bpy.types.Operator):
-    bl_idname = "yzk.yzk_select_edit_mode_face"
-    bl_label = "yzk_select_edit_mode_face"
- 
-    def execute(self, context):
-        if bpy.context.object.mode != 'EDIT':
-            bpy.ops.object.mode_set(mode='EDIT')
-        bpy.ops.mesh.select_mode(type="FACE")
+        bpy.ops.wm.context_set_value(data_path="tool_settings.mesh_select_mode", value=self.editType)
         return {'FINISHED'}
 
 class yzk_object_mode(bpy.types.Operator):
     bl_idname = "yzk.yzk_object_mode"
     bl_label = "yzk_object_mode"
     editType = bpy.props.StringProperty()
- 
+
     def execute(self, context):
         obj = bpy.context.object
         if obj is not None and obj.type in {'MESH', 'CURVE', 'SURFACE','META','FONT','ARMATURE','LATTICE'}:
@@ -383,7 +365,7 @@ class yzk_delete(bpy.types.Operator):
     bl_idname = "yzk.yzk_delete"
     bl_label = "yzk_delete"
     editType = bpy.props.StringProperty()
- 
+
     def execute(self, context):
         obj = bpy.context.object
         if obj.mode == 'OBJECT':
@@ -402,7 +384,7 @@ class yzk_duplicate(bpy.types.Operator):
     bl_idname = "yzk.yzk_duplicate"
     bl_label = "yzk_duplicate"
     editType = bpy.props.StringProperty()
- 
+
     def execute(self, context):
         bpy.ops.object.duplicate(linked=False)
         return {'FINISHED'}
@@ -411,16 +393,16 @@ class yzk_instance(bpy.types.Operator):
     bl_idname = "yzk.yzk_instance"
     bl_label = "yzk_instance"
     editType = bpy.props.StringProperty()
-    
+
     def execute(self, context):
         bpy.ops.object.duplicate(linked=True)
         return {'FINISHED'}
-    
+
 class yzk_edge_soft(bpy.types.Operator):
     bl_idname = "yzk.yzk_edge_soft"
     bl_label = "yzk_soft"
     editType = bpy.props.StringProperty()
-    
+
     def execute(self, context):
         bpy.ops.mesh.mark_sharp(clear=True)
         bpy.ops.transform.edge_crease(value=-1.0)
@@ -430,7 +412,7 @@ class yzk_edge_hard(bpy.types.Operator):
     bl_idname = "yzk.yzk_edge_hard"
     bl_label = "yzk_hard"
     editType = bpy.props.StringProperty()
-    
+
     def execute(self, context):
         bpy.ops.mesh.mark_sharp(clear=False)
         bpy.ops.transform.edge_crease(value=1.0)
@@ -440,42 +422,41 @@ class yzk_snap_to_vertex_on(bpy.types.Operator):
     bl_idname = "yzk.yzk_snap_to_vertex_on"
     bl_label = "yzk_snap_to_vertex_on"
     editType = bpy.props.StringProperty()
-    
+
     def execute(self, context):
         bpy.context.scene.tool_settings.snap_element = 'VERTEX'
-        bpy.context.scene.tool_settings.use_snap = True  
+        bpy.context.scene.tool_settings.use_snap = True
         return {'FINISHED'}
 
 class yzk_snap_to_vertex_off(bpy.types.Operator):
     bl_idname = "yzk.yzk_snap_to_vertex_off"
     bl_label = "yzk_snap_to_vertex_off"
     editType = bpy.props.StringProperty()
-    
+
     def execute(self, context):
         bpy.context.scene.tool_settings.snap_element = 'VERTEX'
-        bpy.context.scene.tool_settings.use_snap = False  
+        bpy.context.scene.tool_settings.use_snap = False
         return {'FINISHED'}
 
 class yzk_snap_vertex_toggle(bpy.types.Operator):
     bl_idname = "yzk.yzk_snap_vertex_toggle"
     bl_label = "yzk_snap_vertex_toggle"
     editType = bpy.props.StringProperty()
-    
+
     def execute(self, context):
         bpy.context.scene.tool_settings.snap_element = 'VERTEX'
         snap = bpy.context.scene.tool_settings.use_snap
         if snap == False:
             bpy.context.scene.tool_settings.use_snap = True
         else:
-            bpy.context.scene.tool_settings.use_snap = False 
+            bpy.context.scene.tool_settings.use_snap = False
         return {'FINISHED'}
 
 class yzk_3dcursor(bpy.types.Operator):
     bl_idname = "yzk.yzk_3dcursor"
     bl_label = "yzk_3dcursor"
-    editType = bpy.props.StringProperty()
-    
-    def execute(self, context): 
+
+    def execute(self, context):
         obj = bpy.context.object
         if obj.mode == 'OBJECT':
             bpy.ops.object.mode_set(mode='EDIT')
@@ -488,15 +469,15 @@ class yzk_3dcursor(bpy.types.Operator):
             bpy.ops.view3d.snap_cursor_to_selected()
             bpy.ops.object.mode_set(mode='OBJECT')
             bpy.ops.object.origin_set(type='ORIGIN_CURSOR', center='MEDIAN')
-            bpy.ops.object.mode_set(mode='EDIT')           
+            bpy.ops.object.mode_set(mode='EDIT')
 
         return {'FINISHED'}
 
 class yzk_curve_new(bpy.types.Operator):
     bl_idname = "yzk.yzk_curve_new"
     bl_label = "yzk_curve_new"
-    
-    def execute(self, context): 
+
+    def execute(self, context):
         obj = bpy.context.object
         if obj is not None and not obj.mode == 'OBJECT':
             bpy.ops.object.mode_set(mode='OBJECT')
@@ -509,8 +490,8 @@ class yzk_curve_new(bpy.types.Operator):
 class yzk_select_handle(bpy.types.Operator):
     bl_idname = "yzk.yzk_select_handle"
     bl_label = "yzk_select_handle"
-    
-    def execute(self, context): 
+
+    def execute(self, context):
         obj = bpy.context.object
         curve = obj.data # Assumed that obj.type == 'CURVE'
         obj.update_from_editmode() # Loads edit-mode data into object data
@@ -529,8 +510,8 @@ class yzk_set_handle(bpy.types.Operator):
     bl_idname = "yzk.yzk_set_handle"
     bl_label = "yzk_set_handle"
     type = bpy.props.StringProperty()
-    
-    def execute(self, context): 
+
+    def execute(self, context):
         bpy.ops.yzk.yzk_select_handle()
         if self.type == "AUTOMATIC":
             bpy.ops.curve.handle_type_set(type='AUTOMATIC')
@@ -545,7 +526,7 @@ class yzk_set_handle(bpy.types.Operator):
 class yzk_curve_dimensions(bpy.types.Operator):
     bl_idname = "yzk.yzk_curve_dimensions"
     bl_label = "yzk_curve_dimensions"
-    
+
     def execute(self, context):
         obj = bpy.context.object
         if obj.data.dimensions == '2D':
@@ -553,13 +534,13 @@ class yzk_curve_dimensions(bpy.types.Operator):
         else:
             bpy.context.object.data.dimensions = '2D'
         return{'FINISHED'}
-       
+
 class yzk_set_screen(bpy.types.Operator):
     bl_idname = "yzk.yzk_set_screen"
     bl_label = "yzk_set_screen"
     screenNum = bpy.props.IntProperty()
-    
-    def execute(self, context): 
+
+    def execute(self, context):
         screenList = bpy.data.screens
         str_currentScreen = bpy.context.screen.name
         str_targetScreen = "scripting"
@@ -597,14 +578,39 @@ class yzk_set_screen(bpy.types.Operator):
         		i=i+1
         elif int_delta == 0:
             print("screenDelta=0")
-          
+
         return {'FINISHED'}
-    
+
+class yzk_update_addon(bpy.types.Operator):
+	bl_idname = "yzk.yzk_update_addon"
+	bl_label = "yzk_update_addon"
+	bl_description = "Update YZK_panel addon"
+	bl_options = {'REGISTER'}
+
+	def execute(self, context):
+		response = urllib.request.urlopen("https://github.com/coverman03/blender/archive/master.zip")
+		tempDir = bpy.app.tempdir
+		zipPath = tempDir + r"\YZKpanel_master.zip"
+		addonDir = os.path.dirname(__file__)
+		f = open(zipPath, "wb")
+		f.write(response.read())
+		f.close()
+		zf = zipfile.ZipFile(zipPath, "r")
+		for f in zf.namelist():
+			if not os.path.basename(f):
+				pass
+			else:
+				if ("blender_master/python/bpy/" in f):
+					uzf = open(addonDir +"\\"+ os.path.basename(f), 'wb')
+					uzf.write(zf.read(f))
+					uzf.close()
+		zf.close()
+		self.report(type={"INFO"}, message="アドオンを更新しました、Blenderを再起動して下さい")
+		return {'FINISHED'}
+
 def register():
     bpy.utils.register_class(yzk_popup_window)
-    bpy.utils.register_class(yzk_select_edit_mode_vert)
-    bpy.utils.register_class(yzk_select_edit_mode_edge)
-    bpy.utils.register_class(yzk_select_edit_mode_face)
+    bpy.utils.register_class(yzk_select_edit_mode)
     bpy.utils.register_class(yzk_object_mode)
     bpy.utils.register_class(yzk_delete)
     bpy.utils.register_class(yzk_duplicate)
@@ -627,9 +633,7 @@ def register():
 
 def unregister():
     bpy.utils.unregister_class(yzk_popup_window)
-    bpy.utils.unregister_class(yzk_select_edit_mode_vert)
-    bpy.utils.unregister_class(yzk_select_edit_mode_edge)
-    bpy.utils.unregister_class(yzk_select_edit_mode_face)
+    bpy.utils.unregister_class(yzk_select_edit_mode)
     bpy.utils.unregister_class(yzk_object_mode)
     bpy.utils.unregister_class(yzk_delete)
     bpy.utils.unregister_class(yzk_duplicate)
