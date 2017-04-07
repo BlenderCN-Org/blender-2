@@ -110,7 +110,6 @@ class yzk_CustomPanel1(bpy.types.Panel):
                     print("None")
                 elif obj.mode == "EDIT":
                     print("None")
-        return {'FINISHED'}
 
     def draw_camera_menu(self, layout):
         #col = layout.column(align=True)#ウィンドウ
@@ -322,8 +321,9 @@ class yzk_CustomPanel1(bpy.types.Panel):
         #col.operator_menu_enum("mesh.merge", "type")
         #col.operator("mesh.merge", text="mergeVertex").type='CENTER'
         col.operator("transform.vertex_random")
-        col.operator("yzk.yzk_3dcursor", text="pivotToSelected")
+        #col.operator("yzk.yzk_3dcursor", text="pivotToSelected")
         col.operator("mesh.remove_doubles")
+        col.operator("mesh.delete_loose", text="deleteSingleVertex")
 
         col = layout.column(align=True)
         col.menu("VIEW3D_MT_edit_mesh_edges", text='edge', icon='EDGESEL')
@@ -963,6 +963,7 @@ class yzk2_CustomPanel1(bpy.types.Panel):
         row.operator("wm.call_menu",text='armatureMenu', icon='OUTLINER_OB_ARMATURE').name="INFO_MT_armature_add"
         row.operator("object.empty_add",text='emptyMenu', icon='OUTLINER_OB_EMPTY')
         row.operator("object.lamp_add",text="lampMenu", icon='OUTLINER_OB_LAMP')
+        return {'FINISHED'}
 
 
 
