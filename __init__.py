@@ -6,7 +6,7 @@ bl_info = {
 	"version" : (1,0),
 	"blender" : (2, 7),
 	"location" : "tools",
-	"description" : "モデリングに有用なコマンドをtoolsへ追加するアドオン",
+	"description" : "add YZK modeling & uv tools",
 	"warning" : "",
 	"wiki_url" : "https://github.com/coverman03/blender",
 	"tracker_url" : "https://github.com/coverman03/blender/issues",
@@ -17,10 +17,12 @@ if "bpy" in locals():
 	import imp
 	imp.reload(yzk_panel)
 	imp.reload(yzk_panel_uv)
+	imp.reload(functions)
 
 else:
 	from . import yzk_panel
 	from . import yzk_panel_uv
+	from . import functions
 
 import bpy
 import os

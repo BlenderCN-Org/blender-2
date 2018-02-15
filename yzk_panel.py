@@ -1,5 +1,5 @@
 import bpy
-import bpy
+from mathutils import Vector
 from itertools import chain #yzk_select_handle
 
 bl_info = {
@@ -15,17 +15,44 @@ bl_info = {
     "category" : "3D View"
 }
 
+
+class yzk_CustomProperties(bpy.types.Panel):
+    bl_category = "yzk"
+    bl_label = "yzk_Modifiers"
+    bl_space_type = "PROPERTIES"
+    bl_region_type = "WINDOW"
+    bl_context = "modifier"
+
+    # メニューを登録する関数
+    def draw(self, context):
+        layout = self.layout
+        col = layout.column(align=True)#モディファイア
+        row = col.row(align=True)
+        row.operator("object.modifier_add",text='mirror', icon='MOD_MIRROR').type='MIRROR'
+        row.operator("object.modifier_add",text='subsurf', icon='MOD_SUBSURF').type='SUBSURF'
+
+        row = col.row(align=True)
+        row.operator("object.modifier_add",text='multires', icon='MOD_MULTIRES').type='MULTIRES'
+        row.operator("object.modifier_add",text='array', icon='MOD_ARRAY').type='ARRAY'
+
+        row = col.row(align=True)
+        row.operator("object.modifier_add",text='decimate', icon='MOD_DECIM').type='DECIMATE'
+        row.operator("object.modifier_add",text='dataTrans', icon='MOD_DATA_TRANSFER').type='DATA_TRANSFER'
+        return {'FINISHED'}
+
 class yzk_CustomPanel1(bpy.types.Panel):
-    bl_label = "tools"
+    bl_category = "yzk"
+    bl_label = "yzk_tools"
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'TOOLS'
-    bl_category = "yzk"
 
     def draw(self, context):
         layout = self.layout
+        scene = context.scene
         col = layout.column(align=True)#ツールシェルフを隠す
         col.operator("view3d.toolshelf", text="Hide Tool Shelf", icon="BACK")
 
+        layout.prop(scene, "camera")
         self.draw_camera_menu(layout)#カメラ
 
         obj = context.active_object
@@ -139,6 +166,7 @@ class yzk_CustomPanel1(bpy.types.Panel):
         row.operator("view3d.viewnumpad",text="back").type="BACK"
         row.operator("view3d.viewnumpad",text="right").type="RIGHT"
         row.operator("view3d.viewnumpad",text="left").type="LEFT"
+        col.operator("view3d.viewnumpad",text="use_camera").type="CAMERA";
 
         row = col.row(align=True)
         props = row.operator("view3d.view_roll", text="roll_Left")
@@ -243,6 +271,7 @@ class yzk_CustomPanel1(bpy.types.Panel):
         #col = layout.column(align=True)
         #col.operator("object.parent_clear",text='parent_clear').type='CLEAR'
 
+        '''
         col = layout.column(align=True)#モディファイア
         col.operator("object.modifier_add",text='modifier', icon='MODIFIER')
         row = col.row(align=True)
@@ -256,6 +285,7 @@ class yzk_CustomPanel1(bpy.types.Panel):
         row = col.row(align=True)
         row.operator("object.modifier_add",text='decimate', icon='MOD_DECIM').type='DECIMATE'
         row.operator("object.modifier_add",text='dataTrans', icon='MOD_DATA_TRANSFER').type='DATA_TRANSFER'
+        '''
 
         col = layout.column(align=True)
         col.operator("object.multi_object_uv_edit",text="Multi Object UV Editing",icon="IMAGE_RGB")
@@ -273,6 +303,7 @@ class yzk_CustomPanel1(bpy.types.Panel):
 
         #選択解除
         col = layout.column(align=True)
+        col.operator("yzk.yzk_mirror_mesh_cleaner", text="yzk_mirror_mesh_cleaner")
         col.operator("yzk.yzk_deselect",text="deselect")
         return{'FINISHED'}
 
@@ -361,6 +392,7 @@ class yzk_CustomPanel1(bpy.types.Panel):
         row.operator("mesh.subdivide")
         row = col.row(align=True)
         row.operator("transform.edge_slide")
+        col.operator("yzk.yzk_select_separate_edge", text="selectSepalateEdge")
 
         col = layout.column(align=True)
         col.menu("VIEW3D_MT_edit_mesh_faces", text='face', icon='FACESEL')
@@ -370,9 +402,10 @@ class yzk_CustomPanel1(bpy.types.Panel):
         props.ngon_method='BEAUTY'
         col.operator("mesh.edge_split",text='edge_split')
         col.operator("mesh.inset")
-        row = col.row(align=True)
-        row.operator("view3d.edit_mesh_extrude_move_normal", text="Extrude")
-        row.operator("view3d.edit_mesh_extrude_individual_move", text="Extrude Individual")
+        col.operator("mesh.destructive_extrude",text="destructive Extrude")
+        #row = col.row(align=True)
+        #row.operator("view3d.edit_mesh_extrude_move_normal", text="Extrude")
+        #row.operator("view3d.edit_mesh_extrude_individual_move", text="Extrude Individual")
         props = col.operator("mesh.separate",text='extruct')
         props.type='SELECTED'
         props = col.operator("mesh.bisect")
@@ -779,8 +812,6 @@ class yzk_CustomPanel1(bpy.types.Panel):
     def draw_curve_edit(self, layout): #CURVE_EDIT
         col = layout.column(align=True)
         col.menu("VIEW3D_MT_edit_curve",icon="OUTLINER_OB_CURVE")
-        col = layout.column(align=True)
-        col.operator("object.convert",text="convert to mesh").target='MESH'
 
         col = layout.column(align=True)
         row = col.row(align=True)
@@ -827,6 +858,44 @@ class yzk_CustomPanel1(bpy.types.Panel):
         #選択解除
         col = layout.column(align=True)
         col.operator("yzk.yzk_deselect",text="deselect")
+
+        col = layout.column(align=True)#トランスフォーム
+        col.menu("VIEW3D_MT_transform_object", icon="MANIPUL")
+        row = col.row(align=True)
+        row.operator("object.location_clear", text="resetTrans")
+        row.operator("object.rotation_clear", text="resetRot")
+        row.operator("object.scale_clear", text="resetScale")
+        row = col.row(align=True)
+        props = row.operator("object.transform_apply" ,text="freezeTrans")
+        props.location=True
+        props.rotation=False
+        props.scale=False
+        props = row.operator("object.transform_apply" ,text="freezeRot")
+        props.location=False
+        props.rotation=True
+        props.scale=False
+        props = row.operator("object.transform_apply" ,text="freezeScale")
+        props.location=False
+        props.rotation=False
+        props.scale=True
+        row = col.row(align=True)
+        row.operator("yzk.yzk_copy_transform", text="transform copy")
+        props = row.operator("object.transform_apply" ,text="freeze_All")
+        props.location=True
+        props.rotation=True
+        props.scale=True
+
+        col = layout.column(align=True)#カーソル
+        row = col.row(align=True)
+        row.operator("view3d.snap_cursor_to_center", text="CursorReset", icon="X")
+        row.operator("view3d.snap_cursor_to_selected", text="CursorToSelected", icon="CURSOR")
+        row = col.row(align=True)
+        row.operator("object.origin_set", text="Center", icon="CURSOR").type='ORIGIN_CENTER_OF_MASS'
+        props = row.operator("object.origin_set", text="OriginToCursor", icon="CURSOR")
+        props.type='ORIGIN_CURSOR'
+
+        col = layout.column(align=True)
+        col.operator("object.convert",text="convert to mesh").target='MESH'
         return {'FINISHED'}
 
     def draw_surface_object(self, layout):#SURFACE_OBJECT
@@ -1015,6 +1084,20 @@ class yzk_select_edit_mode_face(bpy.types.Operator):
                 bpy.ops.object.mode_set(mode='EDIT')
             bpy.ops.mesh.select_mode(type="FACE")
         return {'FINISHED'}
+
+class yzk_select_separate_edge(bpy.types.Operator):
+    bl_idname = "yzk.yzk_select_separate_edge"
+    bl_label = "yzk_select_separate_edge"
+
+    def execute(self, context):
+        obj = bpy.context.object
+        if obj is not None and obj.type == 'MESH':
+            if bpy.context.object.mode != 'EDIT':
+                bpy.ops.object.mode_set(mode='EDIT')
+            bpy.ops.mesh.select_all(action='SELECT')
+            bpy.ops.mesh.region_to_loop()
+        return {'FINISHED'}
+
 
 class yzk_object_mode(bpy.types.Operator):
     bl_idname = "yzk.yzk_object_mode"
@@ -1279,9 +1362,9 @@ class yzk_copy_transform(bpy.types.Operator):
     def execute(self, context):
         matrix_world = bpy.context.object.matrix_world
         for obj in bpy.context.selected_objects:
-            if obj.type == "MESH":
-                bpy.context.scene.objects.active = obj
-                obj.matrix_world  = matrix_world
+            #if obj.type == "MESH":
+            bpy.context.scene.objects.active = obj
+            obj.matrix_world  = matrix_world
         return {'FINISHED'}
 
 class yzk_curve_dimensions(bpy.types.Operator):
@@ -1476,6 +1559,37 @@ class yzk_mesh_display_uvedit(bpy.types.Operator):
         bpy.context.object.data.show_normal_face = False
         return {'FINISHED'}
 
+class yzk_mirror_mesh_cleaner(bpy.types.Operator):
+    bl_idname = "yzk.yzk_mirror_mesh_cleaner"
+    bl_label = "yzk_mirror_mesh_cleaner"
+    bl_description = "yzk_mirror_mesh_cleaner"
+    bl_options = {'REGISTER'}
+
+    def execute(self, context):
+        #ポリゴンセンターを取得
+        bpy.ops.object.mode_set(mode='EDIT')
+        bpy.ops.mesh.select_all(action='DESELECT')
+        bpy.ops.object.mode_set(mode='OBJECT')
+
+        f_level = 4 #小数点精度
+        src_list = []
+
+        bpy.context.selected_objects[1].data.name
+        for poly in bpy.context.selected_objects[1].data.polygons:
+        	src_list.append(Vector((round(poly.center[0], f_level), round(poly.center[1], f_level), round(poly.center[2], f_level))))
+
+        bpy.context.selected_objects[0].data.name
+        for tgt in bpy.context.selected_objects[0].data.polygons:
+        	for src in src_list:
+        		if src == Vector((round(tgt.center[0], f_level), round(tgt.center[1], f_level), round(tgt.center[2], f_level))):
+        			tgt.select = True
+
+        bpy.ops.object.mode_set(mode='EDIT')
+        #bpy.ops.mesh.select_all(action='INVERT')
+        #bpy.ops.mesh.delete(type='FACE')
+        #bpy.ops.object.mode_set(mode='OBJECT')
+        return {'FINISHED'}
+
 class yzk_apend_cylinder(bpy.types.Operator):
     bl_idname = "yzk.yzk_apend_cylinder"
     bl_label = "yzk_apend_cylinder"
@@ -1495,10 +1609,12 @@ class yzk_apend_cylinder(bpy.types.Operator):
         return {'FINISHED'}
 
 def register():
+    bpy.utils.register_class(yzk_CustomProperties)
     bpy.utils.register_class(yzk_popup_window)
     bpy.utils.register_class(yzk_select_edit_mode_vert)
     bpy.utils.register_class(yzk_select_edit_mode_edge)
     bpy.utils.register_class(yzk_select_edit_mode_face)
+    bpy.utils.register_class(yzk_select_separate_edge)
     bpy.utils.register_class(yzk_object_mode)
     bpy.utils.register_class(yzk_outliner_mode)
     bpy.utils.register_class(yzk_delete)
@@ -1530,13 +1646,16 @@ def register():
     bpy.utils.register_class(yzk_material_remove)
     bpy.utils.register_class(yzk_mesh_display_modeling)
     bpy.utils.register_class(yzk_mesh_display_uvedit)
+    bpy.utils.register_class(yzk_mirror_mesh_cleaner)
     bpy.utils.register_class(yzk_apend_cylinder)
 
 def unregister():
+    bpy.utils.unregister_class(yzk_CustomProperties)
     bpy.utils.unregister_class(yzk_popup_window)
     bpy.utils.unregister_class(yzk_select_edit_mode_vert)
     bpy.utils.unregister_class(yzk_select_edit_mode_edge)
     bpy.utils.unregister_class(yzk_select_edit_mode_face)
+    bpy.utils.unregister_class(yzk_select_separate_edge)
     bpy.utils.unregister_class(yzk_object_mode)
     bpy.utils.unregister_class(yzk_outliner_mode)
     bpy.utils.unregister_class(yzk_delete)
@@ -1568,6 +1687,7 @@ def unregister():
     bpy.utils.unregister_class(yzk_material_remove)
     bpy.utils.unregister_class(yzk_mesh_display_modeling)
     bpy.utils.unregister_class(yzk_mesh_display_uvedit)
+    bpy.utils.unregister_class(yzk_mirror_mesh_cleaner)
     bpy.utils.unregister_class(yzk_apend_cylinder)
 
 if __name__ == "__main__":

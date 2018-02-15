@@ -220,6 +220,7 @@ class yzk_uvtools(bpy.types.Panel):
 
                     col = layout.column(align=True)
                     col.operator("uv.uv_squares_by_shape")
+                    col.operator("uv.textools_unwrap_peel_edge")
                     col.operator("uv.muv_packuv")
 
                     col = layout.column(align=True)
@@ -253,6 +254,18 @@ class yzk_uvtools(bpy.types.Panel):
 
                     col = layout.column(align=True)
                     col.operator("object.bake_image",text="Bake",icon="RENDER_STILL")
+
+                    col = layout.column(align=True)
+                    col.prop(context.scene, "camera")
+
+                    col = layout.column(align=True)
+                    col.operator("render.render",text="Render",icon="RENDER_STILL")
+                    row = col.row(align=True)
+                    row.operator("image.view_all","View Fit").fit_view=True
+                    row.operator("image.view_zoom_ratio",text="Zoom1:1").ratio=1
+
+                    col = layout.column(align=True)
+                    col.operator("image.save_as")
 
 
 
